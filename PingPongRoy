@@ -1,0 +1,92 @@
+Network Simulation
+ex2 program:PingPongRoy
+
+1. Player.ned
+
+package pingpongroy;
+
+//
+// TODO auto-generated module
+//
+simple Player
+{
+    parameters:
+        double ballDropRate = default(0.2);  // Probability to drop the ball
+        bool startBall = default(false);     // If true, this player starts with the ball
+
+    gates:
+        input in;
+        output out;  // communication gate with other player
+}
+
+2.CarolDave.ned
+
+package pingpongroy.simulations;
+import pingpongroy.Player;
+network CarolDave
+{
+    submodules:
+        Carol: Player {
+            parameters:
+                startBall = true;    // Carol starts with the ball
+        }
+        Dave: Player {
+            parameters:
+                startBall = false;   // Dave waits for the ball
+        }
+
+    connections:
+        Carol.out --> Dave.in;
+        Dave.out --> Carol.in;  // bi-directional connection
+}
+
+3. Player.cc
+
+#include "Player.h"
+
+Define_Module(Player);
+
+void Player::initialize()
+{
+    // TODO - Generated method body
+    // Check if this player starts with the ball
+        if (par("startBall").boolValue()) {
+            // Create a new message called "ball"
+            cMessage *ball = new cMessage("ball");
+            // Schedule it to be sent at simulation time 1
+            scheduleAt(1.0, ball);
+        }
+}
+
+void Player::handleMessage(cMessage *msg)
+{
+    // TODO - Generated method body
+    // Only process the "ball" messages
+       if (strcmp(msg->getName(), "ball") == 0) {
+           // Generate a random number between 0 and 1
+           double randNum = uniform(0, 1);
+
+           // Check against the ballDropRate parameter
+           double dropRate = par("ballDropRate").doubleValue();
+           if (randNum < dropRate) {
+               // Drop the ball
+               delete msg;
+           } else {
+               // Send the ball back after a random delay between 0.1 and 1 seconds
+               double delay = uniform(0.1, 1.0);
+               sendDelayed(msg, delay, "out"); // "out" is the gate name
+           }
+       } else {
+           // In case any other message comes in
+           delete msg;
+       }
+}
+
+4.omnetpp.ini
+
+[General]
+network = CarolDave
+
+**.Dave.ballDropRate = 0.4
+**.Carol.startBall = true
+
