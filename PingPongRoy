@@ -90,3 +90,138 @@ network = CarolDave
 **.Dave.ballDropRate = 0.4
 **.Carol.startBall = true
 
+..................................................
+..................................................
+
+//commented version of those program
+
+1.Player.ned
+
+package pingpongroy;
+
+//
+// Player Module
+// -------------------
+// This simple module represents a ping-pong player. It can send and receive
+// a "ball" message. The module has a probability to drop the ball
+// each time it receives one, simulating an error or missed hit.
+//
+simple Player
+{
+    parameters:
+        double ballDropRate = default(0.2);  // Probability to drop the ball (0.0 to 1.0)
+        bool startBall = default(false);     // If true, this player starts the game
+
+    gates:
+        input in;   // Gate to receive messages from the other player
+        output out; // Gate to send messages to the other player
+}
+
+2.CarolDave.ned
+
+package pingpongroy.simulations;
+import pingpongroy.Player;
+
+//
+// CarolDave Network
+// -------------------
+// This network connects two Player modules: Carol and Dave.
+// Carol starts the game by sending the first ball. The players
+// send the ball back and forth through their gates until a ball
+// is dropped based on each player's ballDropRate parameter.
+//
+network CarolDave
+{
+    submodules:
+        // Carol module
+        Carol: Player {
+            parameters:
+                startBall = true;    // Carol starts with the ball
+        }
+        // Dave module
+        Dave: Player {
+            parameters:
+                startBall = false;   // Dave waits for the ball
+        }
+
+    // Connections between players
+    connections:
+        Carol.out --> Dave.in;  // Carol sends to Dave
+        Dave.out --> Carol.in;  // Dave sends back to Carol
+}
+
+3. Player.cc
+
+#include "Player.h"
+
+Define_Module(Player);  // Macro to register the module with OMNeT++
+
+/**
+ * initialize()
+ * -------------------
+ * This function is called once at the start of the simulation.
+ * If the player is set to start with the ball (startBall = true),
+ * a new "ball" message is created and scheduled to be sent at simulation time 1.
+ */
+void Player::initialize()
+{
+    // Check if this player starts with the ball
+    if (par("startBall").boolValue()) {
+        // Create a new message called "ball"
+        cMessage *ball = new cMessage("ball");
+
+        // Schedule the message to be processed at simulation time 1
+        scheduleAt(1.0, ball);
+    }
+}
+
+/**
+ * handleMessage(cMessage *msg)
+ * -------------------
+ * This function is called whenever the module receives a message.
+ * Only messages named "ball" are processed.
+ * The message is either dropped or sent back with a random delay based on ballDropRate.
+ */
+void Player::handleMessage(cMessage *msg)
+{
+    // Check if the message is the ball
+    if (strcmp(msg->getName(), "ball") == 0) {
+
+        // Generate a random number between 0 and 1 to simulate probabilistic drop
+        double randNum = uniform(0, 1);
+
+        // Read the ballDropRate parameter for this player
+        double dropRate = par("ballDropRate").doubleValue();
+
+        if (randNum < dropRate) {
+            // Ball is dropped (deleted)
+            EV << getName() << " dropped the ball.\n";  // Debug output
+            delete msg;
+        } else {
+            // Ball is not dropped, send it back after a random delay
+            double delay = uniform(0.1, 1.0);           // Delay between 0.1s and 1s
+            EV << getName() << " sends the ball after " << delay << "s.\n"; // Debug output
+            sendDelayed(msg, delay, "out");             // Send through output gate
+        }
+
+    } else {
+        // If an unexpected message arrives, delete it to prevent memory leaks
+        delete msg;
+    }
+}
+
+4.omnetpp.ini>>for 1st parameter setup 
+
+[General]
+network = CarolDave
+**.Carol.startBall = true
+**.Carol.ballDropRate = 0.2
+**.Dave.ballDropRate = 0.4
+
+5. omnetpp.ini>>for 2nd parameter setup
+[General]
+network = CarolDave
+**.Carol.startBall = true
+**.Carol.ballDropRate = 0.1
+**.Dave.ballDropRate = 0.05
+
