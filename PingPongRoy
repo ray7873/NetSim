@@ -217,6 +217,7 @@ network = CarolDave
 **.Carol.startBall = true
 **.Carol.ballDropRate = 0.2
 **.Dave.ballDropRate = 0.4
+record-eventlog=true
 
 5. omnetpp.ini>>for 2nd parameter setup
 [General]
@@ -224,4 +225,5 @@ network = CarolDave
 **.Carol.startBall = true
 **.Carol.ballDropRate = 0.1
 **.Dave.ballDropRate = 0.05
+record-eventlog=true
 
