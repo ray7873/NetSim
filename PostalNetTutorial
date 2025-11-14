@@ -1,4 +1,4 @@
-prog1___Apartment.ned(module name)
+***Prog1___Apartment.ned(module name)
 
 package postalnettutorial;                           //package name of modules,
 
@@ -18,6 +18,59 @@ simple Apartment                                     //This Apartment module bel
 
     gates:                                           //Declares the communication ports of the module.
 
-        inout gate;                                  //his creates a gate named gate.It can both send and receive messages.
+        inout gate;                                  //This creates a gate named gate.It can both send and receive messages.
                                                           Useful for exchanging messages between modules like Postman, Neighbors, Network nodes.
+}
+
+***prog2___PacketStation.ned(module name)
+
+package postalnettutorial;//package name of modules,
+
+//
+// TODO auto-generated module
+//
+simple PacketStation                             //This PacketStation module belongs to the postalnettutorial package.A simple module can contain
+                                                      parameters,gates & C++ implementation (Apartment.cc).
+{
+    parameters:
+ 		
+ 		@display("i=misc/post_vs");                  //i=misc/post_vs" means-Use the icon post_vs located in OMNeT++’s misc icon folder.
+ 		
+ 	gates:
+ 
+ 		inout gate[3];                               //Creates an array of 3 inout gates named gate.
+ 		inout out_gate;                              //A separate inout gate not part of the array.This gate can be used as the central output,
+                                                      while gate[0..2] are used for connections to nearby nodes.
+}
+
+***prog3___PacketStation.ned(module name)
+
+package postalnettutorial;                       //Declares that this module belongs to the postalnettutorial package.
+
+import postalnettutorial.Apartment;              //These lines import the two modules you will use inside Community
+import postalnettutorial.PacketStation;
+
+module Community                                  //Declares a compound module named Community.
+                                                      A compound module contains:parameters,gates,submodules,connections
+{
+    parameters:
+ 		@display("i=misc/town_l");                     //Sets the icon to a town symbol.
+ 		int numApartment = 3;                         // not default, fixed//Declares a parameter that defines how many apartments your community has.
+
+ 		int commID = default(-1);                      //A unique ID for this community.If not set in omnetpp.ini, it becomes −1.
+ 		
+ 	gates: 
+		inout comm_gate;                               //A communication gate for the whole community.Can send and receive messages.
+                                                        Used to connect this community to something else (e.g., a central router, hub, or another community).
+ 
+    submodules:
+ 		apartment[numApartment]: Apartment;            //Creates an array of Apartment modules, size 3.
+ 		post: PacketStation;                            //Creates a single PacketStation submodule.This will act as a hub/router for the apartments.
+ 		
+ 	connections:
+         apartment[0].gate <--> post.gate[0];        //Connects each apartment to one gate on the PacketStation.
+         apartment[1].gate <--> post.gate[1];
+         apartment[2].gate <--> post.gate[2];
+         post.out_gate <--> comm_gate;              //Connects the PacketStation’s outgoing gate to the community’s main gate.
+                                                    This lets the community send/receive messages from outside.
 }
