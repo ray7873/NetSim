@@ -1,0 +1,23 @@
+prog1___Apartment.ned(module name)
+
+package postalnettutorial;                           //package name of modules,
+
+//
+// TODO auto-generated module
+//
+simple Apartment                                     //This Apartment module belongs to the postalnettutorial package.A simple module can contain
+                                                        parameters,gates & C++ implementation (Apartment.cc).
+{
+    parameters:                                      //This section lists configuration parameters for the module.
+
+        @display("i=misc/house");                    // This sets the icon used for the module. In the graphical OMNeT++ simulation.i=misc/house means:
+                                                            Use the “house” icon from the misc icon folder.
+        int apartmentID = default(-1);               //Declares an integer parameter named apartmentID.default(-1) means:
+                                                          If the user does not set this parameter in omnetpp.ini,
+                                                            It will automatically take the value –1.You can assign a unique ID to each apartment.
+
+    gates:                                           //Declares the communication ports of the module.
+
+        inout gate;                                  //his creates a gate named gate.It can both send and receive messages.
+                                                          Useful for exchanging messages between modules like Postman, Neighbors, Network nodes.
+}
