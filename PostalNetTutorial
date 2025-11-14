@@ -74,3 +74,26 @@ module Community                                  //Declares a compound module n
          post.out_gate <--> comm_gate;              //Connects the PacketStation’s outgoing gate to the community’s main gate.
                                                     This lets the community send/receive messages from outside.
 }
+
+***prog4___PostalNet.ned(module name)
+
+package postalnettutorial.simulations;
+ 
+import postalnettutorial.Community;
+import postalnettutorial.Apartment;
+import postalnettutorial.PacketStation;
+
+network PostalNet 								 //Declares a network called PostalNet.Networks can include submodules (modules) and connections.
+{
+   parameters:
+ 		int numCommunities = 2; 					// not default, fixed.//Declares a network parameter numCommunities.
+															This determines how many Community modules will exist in the network.Here it is fixed to 2.
+ 	submodules:
+ 		community[numCommunities]: Community;			//Creates an array of Community modules.The number of communities is controlled by numCommunities.
+ 
+ 	connections:
+ 		community[0].comm_gate <--> community[1].comm_gate;  //Connects the main gates of the two communities.
+																	Effectively, the two communities can now exchange packets via their PacketStations.
+}
+
+
