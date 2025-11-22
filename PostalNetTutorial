@@ -43,7 +43,7 @@ simple PacketStation                             //This PacketStation module bel
                                                       while gate[0..2] are used for connections to nearby nodes.
 }
 
-***prog3___PacketStation.ned(module name)
+***prog3___Community.ned(module name)
 
 package postalnettutorial;                       //Declares that this module belongs to the postalnettutorial package.
 
