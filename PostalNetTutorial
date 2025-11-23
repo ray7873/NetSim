@@ -187,4 +187,17 @@ void PacketStation::handleMessage(cMessage *msg)
     }
 }
 
+***prog7___omnetpp.ini
 
+[General]
+network = PostalNet 					//“The top-level network that should be simulated is the PostalNet NED network.”
+record-eventlog = true					//You need this to generate sequence charts in the IDE.
+
+# set community IDs
+**.community[0].communityID = 0			//This assigns communityID = 0 to the first community
+**.community[1].communityID = 1			//And communityID = 1 to the second one
+
+# set apartment numbers
+**.apartment[0].apartmentID = 0			//" ** " means Apply this to any module in the network that matches
+**.apartment[1].apartmentID = 1
+**.apartment[2].apartmentID = 2
