@@ -96,4 +96,95 @@ network PostalNet 								 //Declares a network called PostalNet.Networks can in
 																	Effectively, the two communities can now exchange packets via their PacketStations.
 }
 
+***prog5___Apartment.cc(module name)
+
+#include "Apartment.h"
+
+Define_Module(Apartment);
+
+void Apartment::initialize()
+{
+    // get parameters from parent modules
+    int apartments = getParentModule()->par("numApartments");								//returns the Community module.
+    int communities = getParentModule()->getParentModule()->par("numCommunities");		 //returns the top-level network.it declares how many apartments are in this community
+																						how many communities exist in the whole network
+
+    EV << "We have " << apartments << " apartments per community and "
+       << communities << " communities.\n"; 											//Prints information to the eventlog/output for debugging.
+
+    // select random destination
+    int destComm = intuniform(0, communities - 1);										//intuniform(a, b) generates a random integer between a and b (inclusive).
+    int destApartment = intuniform(0, apartments - 1);
+
+    // create and send message
+    cMessage *letter1 = new cMessage();													//Creates a new message named letter1.Adds two parameters inside the message- destCommunity destApartment
+																						These parameters tell the message where it should go.
+    letter1->addPar("destCommunity") = destComm;
+    letter1->addPar("destApartment") = destApartment;
+
+    sendDelayed(letter1, 50, "gate$o");									//Sends the message after 50 simulation seconds.Sends it through the output gate called gate.
+}
+
+
+void Apartment::handleMessage(cMessage *msg)
+{
+    // TODO - Generated method body
+    // is this a self-timer? no currently used.
+     if (msg->isSelfMessage()) 						//If the message is a self scheduled event, it ends the simulation.
+														You are not using self messages in this task, so this is just safety code.
+	 {
+     EV << "Self-timers are currently not in use, stop simulation.\n";
+     endSimulation();
+     }
+     if (((int)msg->par("destCommunity") == (int)getParentModule()->par("communityID")) //Message is for this community
+    && ((int)msg-> par("destApartment") == (int)par("apartmentID"))) 					//Message is for this apartment
+	{
+     // letter received and checked that it was correctly sent. simply print out a debug message
+     EV << "Letter received.\n";
+     // delete the message
+     delete msg;
+     }
+}
+
+***prog6___PacketStation.cc(module name)
+
+#include "PacketStation.h"
+
+Define_Module(PacketStation);
+
+void PacketStation::initialize()
+{
+    // TODO - Generated method body
+}
+
+void PacketStation::handleMessage(cMessage *msg)
+{
+    // TODO - Generated method body
+    EV << "Message received.\n";
+    // is this a self-timer? no currently used.
+    if (msg->isSelfMessage()) 
+	{
+    EV << "Self-timers are currently not in use, stop simulation.\n";
+    endSimulation();
+    }
+    // if a message is received for my village, forward it to the house.
+    if ((int)msg->par("destCommunity") == (int)getParentModule()->par("communityID")) //PacketStation belongs to a community.
+																						If the message is meant for THIS community → deliver to the correct apartment.
+	{
+    EV << "Same community, send directly to apartment.\n";
+    // find out which house
+    int house = msg->par("destApartment");								//destApartment tells which apartment to forward to. Uses gate$o[index] to select the correct gate.
+																			Sends the message there.
+    // get a pointer to the out gate
+    cGate *where = gate("gate$o", house);//
+    // send it out
+    send(msg, where);
+    }
+    else 
+	{
+    EV << "Other community, send.\n";									//Message belongs to another community.Forward it outward through out_gate$o.
+    send(msg, "out_gate$o");
+    }
+}
+
 
